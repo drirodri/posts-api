@@ -13,9 +13,6 @@ import (
 var DB *gorm.DB
 
 func InitDatabase(cfg DatabaseConfig) {
-
-	
-
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=America/Sao_Paulo",
 		cfg.Host, cfg.Username, cfg.Password, cfg.DBName, cfg.Port, cfg.SSLMode)
 
