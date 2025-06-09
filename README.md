@@ -42,7 +42,7 @@ See `api-structure.md` for detailed project structure.
    DATABASE_NAME=posts-api
 
    # Application Configuration
-   PORT=3334
+   PORT=your_desired_api_port
 
    # Users API Integration
    USERS_API_URL=https://your-users-api.com
