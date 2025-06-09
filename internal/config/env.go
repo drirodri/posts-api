@@ -17,8 +17,13 @@ type DatabaseConfig struct {
 	SSLMode  string
 }
 
+type ServerConfig struct {
+	Port string
+}
+
 type AppConfig struct {
 	Database DatabaseConfig
+	Server ServerConfig
 }
 
 func LoadConfig() (*AppConfig, error) {
@@ -34,6 +39,9 @@ func LoadConfig() (*AppConfig, error) {
 			Password: os.Getenv("DATABASE_PASSWORD"),
 			DBName:   os.Getenv("DATABASE_NAME"),
 			SSLMode:  os.Getenv("DATABASE_SSLMODE"),
+		},
+		Server: ServerConfig{
+			Port: getEnv("PORT", "8080"),
 		},
 	}
 

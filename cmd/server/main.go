@@ -5,11 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"posts-api/internal/config"
 	"posts-api/internal/models"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -24,7 +21,7 @@ func main() {
 	config.InitDatabase(appConfig.Database)
 	defer config.CloseDatabase()
 
-	fmt.Println("Database connection established successfully \n Migrating database...")
+	fmt.Println("Database connection established successfully\nMigrating database...")
 
 	err = config.DB.AutoMigrate(&models.Post{})
 
@@ -34,11 +31,8 @@ func main() {
 	fmt.Println("Database migration completed successfully")
 
 	port := ":8080"
-	err = godotenv.Load()
-	if err != nil {
-		fmt.Println("Error loading .env file")
-	}
-	if portEnv := os.Getenv("PORT"); portEnv != "" {
+
+	if portEnv := appConfig.Server.Port; portEnv != "" {
 		port = ":" + portEnv
 	}
 
@@ -50,5 +44,4 @@ func main() {
     fmt.Println("Visit http://localhost" + port + " to test the API")
 
     log.Fatal(http.ListenAndServe(port, nil))
-	
 }
