@@ -18,7 +18,8 @@ type DatabaseConfig struct {
 }
 
 type ServerConfig struct {
-	Port string
+	Port        string
+	UsersAPIURL string
 }
 
 type AppConfig struct {
@@ -39,9 +40,9 @@ func LoadConfig() (*AppConfig, error) {
 			Password: os.Getenv("DATABASE_PASSWORD"),
 			DBName:   os.Getenv("DATABASE_NAME"),
 			SSLMode:  os.Getenv("DATABASE_SSLMODE"),
-		},
-		Server: ServerConfig{
-			Port: getEnv("PORT", "8080"),
+		},		Server: ServerConfig{
+			Port:        getEnv("PORT", "8080"),
+			UsersAPIURL: os.Getenv("USERS_API_URL"),
 		},
 	}
 
