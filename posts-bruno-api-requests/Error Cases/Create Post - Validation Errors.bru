@@ -1,0 +1,56 @@
+meta {
+  name: Create Post - Validation Errors
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/posts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: your-jwt-token-here
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "",
+    "content": ""
+  }
+}
+
+docs {
+  # Create Post - Validation Errors Test
+  
+  This test verifies that the API properly validates post data.
+  
+  **Expected Behavior:**
+  - Should return 400 Bad Request (if token is valid)
+  - Should return 401 Unauthorized (if token is invalid)
+  - Should include validation error details for empty fields
+  - Should not create any post
+}
+
+tests {
+  test("should return 400 or 401 status", function() {
+    const status = res.getStatus();
+    expect([400, 401]).to.include(status);
+  });
+  
+  test("should return error response", function() {
+    expect(res.getBody()).to.have.property('success', false);
+  });
+  
+  test("if validation error, should include field errors", function() {
+    if (res.getStatus() === 400) {
+      expect(res.getBody()).to.have.property('data');
+      expect(res.getBody().data).to.have.property('validation_errors');
+    }
+  });
+}

@@ -1,0 +1,31 @@
+meta {
+  name: Get Post - Invalid ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/posts/invalid-id
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+docs {
+  # Get Post - Invalid ID Test
+  
+  This test verifies that the API properly handles invalid post ID formats.
+  
+  **Expected Behavior:**
+  - Should return 404 Not Found (route not matched due to regex constraint)
+  - The route pattern `{id:[0-9]+}` should only match numeric IDs
+}
+
+tests {
+  test("should return 404 status", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+}

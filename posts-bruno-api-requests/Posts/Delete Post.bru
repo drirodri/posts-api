@@ -1,0 +1,91 @@
+meta {
+  name: Delete Post
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/posts/1
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: your-jwt-token-here
+}
+
+headers {
+  Content-Type: application/json
+}
+
+docs {
+  # Delete Post
+  
+  Deletes an existing post. This endpoint requires authentication and only the post author can delete their posts.
+  
+  **Authentication:** Bearer Token (JWT from Users API)
+  
+  **Path Parameters:**
+  - `id`: The ID of the post to delete
+  
+  **Expected Response (Success):**
+  ```json
+  {
+    "success": true,
+    "message": "Post deleted successfully",
+    "data": null
+  }
+  ```
+  
+  **Expected Response (Forbidden):**
+  ```json
+  {
+    "success": false,
+    "message": "Access denied",
+    "error": {
+      "code": "FORBIDDEN",
+      "message": "Access denied",
+      "details": "You can only delete your own posts"
+    }
+  }
+  ```
+  
+  **Status Codes:** 
+  - 200 OK (success)
+  - 401 Unauthorized (invalid/missing token)
+  - 403 Forbidden (not the post author)
+  - 404 Not Found (post doesn't exist)
+}
+
+tests {
+  test("should return appropriate status", function() {
+    const status = res.getStatus();
+    expect([200, 401, 403, 404]).to.include(status);
+  });
+  
+  test("should return proper response structure", function() {
+    expect(res.getBody()).to.have.property('success');
+    expect(res.getBody()).to.have.property('message');
+  });
+  
+  test("if successful, should confirm deletion", function() {
+    if (res.getStatus() === 200) {
+      expect(res.getBody().success).to.equal(true);
+      expect(res.getBody().message).to.equal('Post deleted successfully');
+    }
+  });
+  
+  test("if forbidden, should indicate access denied", function() {
+    if (res.getStatus() === 403) {
+      expect(res.getBody()).to.have.property('error');
+      expect(res.getBody().error.code).to.equal('FORBIDDEN');
+    }
+  });
+  
+  test("if unauthorized, should indicate invalid token", function() {
+    if (res.getStatus() === 401) {
+      expect(res.getBody()).to.have.property('error');
+      expect(res.getBody().error.code).to.equal('INVALID_TOKEN');
+    }
+  });
+}

@@ -1,0 +1,52 @@
+meta {
+  name: Create Post - Invalid Token
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/posts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: invalid-token-123
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Test Post",
+    "content": "This should fail due to invalid token"
+  }
+}
+
+docs {
+  # Create Post - Invalid Token Test
+  
+  This test verifies that the API properly rejects requests with invalid JWT tokens.
+  
+  **Expected Behavior:**
+  - Should return 401 Unauthorized
+  - Should include error details about invalid token
+  - Should not create any post
+}
+
+tests {
+  test("should return 401 status", function() {
+    expect(res.getStatus()).to.equal(401);
+  });
+  
+  test("should return error response", function() {
+    expect(res.getBody()).to.have.property('success', false);
+    expect(res.getBody()).to.have.property('error');
+  });
+  
+  test("should indicate invalid token", function() {
+    expect(res.getBody().error.code).to.equal('INVALID_TOKEN');
+  });
+}

@@ -1,0 +1,46 @@
+meta {
+  name: Update Post - No Changes
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/v1/posts/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: your-jwt-token-here
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+docs {
+  # Update Post - No Changes Test
+  
+  This test verifies that the API properly handles update requests with no changes.
+  
+  **Expected Behavior:**
+  - Should return 400 Bad Request
+  - Should indicate that no changes were provided
+  - Should not modify the post
+}
+
+tests {
+  test("should return 400 for no changes", function() {
+    if (res.getStatus() === 400) {
+      expect(res.getBody()).to.have.property('success', false);
+      expect(res.getBody().error.code).to.equal('NO_CHANGES');
+    } else if (res.getStatus() === 401) {
+      // Token might be invalid
+      expect(res.getBody().error.code).to.equal('INVALID_TOKEN');
+    }
+  });
+}

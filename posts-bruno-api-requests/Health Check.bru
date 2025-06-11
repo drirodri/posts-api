@@ -1,0 +1,45 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/health
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+docs {
+  # Health Check Endpoint
+  
+  This endpoint checks if the Posts API service is healthy and running.
+  
+  **Expected Response:**
+  ```json
+  {
+    "status": "healthy",
+    "service": "posts-api"
+  }
+  ```
+  
+  **Status Code:** 200 OK
+}
+
+tests {
+  test("should return 200 status", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("should return healthy status", function() {
+    expect(res.getBody()).to.have.property('status', 'healthy');
+  });
+  
+  test("should return service name", function() {
+    expect(res.getBody()).to.have.property('service', 'posts-api');
+  });
+}

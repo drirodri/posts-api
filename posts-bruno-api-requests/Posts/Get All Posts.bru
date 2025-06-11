@@ -1,0 +1,80 @@
+meta {
+  name: Get All Posts
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/posts?page=1&page_size=10
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  page_size: 10
+}
+
+headers {
+  Content-Type: application/json
+}
+
+docs {
+  # Get All Posts
+  
+  Retrieves a paginated list of all posts. This is a public endpoint that doesn't require authentication.
+  
+  **Query Parameters:**
+  - `page` (optional): Page number (default: 1)
+  - `page_size` (optional): Number of posts per page (default: 10, max: 100)
+  
+  **Expected Response:**
+  ```json
+  {
+    "success": true,
+    "message": "Posts retrieved successfully",
+    "data": {
+      "posts": [
+        {
+          "id": 1,
+          "title": "Sample Post",
+          "content": "This is a sample post content",
+          "author_id": 1,
+          "author": {
+            "id": 1,
+            "username": "john_doe",
+            "email": "john@example.com"
+          },
+          "created_at": "2025-06-11T10:00:00Z",
+          "updated_at": "2025-06-11T10:00:00Z"
+        }
+      ],
+      "total_count": 1,
+      "page": 1,
+      "page_size": 10,
+      "total_pages": 1
+    }
+  }
+  ```
+  
+  **Status Code:** 200 OK
+}
+
+tests {
+  test("should return 200 status", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("should return success response", function() {
+    expect(res.getBody()).to.have.property('success', true);
+  });
+  
+  test("should return posts data", function() {
+    expect(res.getBody()).to.have.property('data');
+    expect(res.getBody().data).to.have.property('posts');
+    expect(res.getBody().data).to.have.property('total_count');
+    expect(res.getBody().data).to.have.property('page');
+    expect(res.getBody().data).to.have.property('page_size');
+    expect(res.getBody().data).to.have.property('total_pages');
+  });
+}

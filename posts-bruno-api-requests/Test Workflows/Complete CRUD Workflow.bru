@@ -1,0 +1,45 @@
+meta {
+  name: Complete CRUD Workflow
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/health
+  body: none
+  auth: none
+}
+
+docs {
+  # Complete CRUD Workflow Test
+  
+  This is the first step of a complete CRUD (Create, Read, Update, Delete) workflow test.
+  
+  **Workflow Steps:**
+  1. **Health Check** (this request) - Verify API is running
+  2. Get all posts (should be empty initially)
+  3. Create a new post (requires valid JWT token)
+  4. Get the created post by ID
+  5. Update the post
+  6. Get all posts (should contain our post)
+  7. Get posts by author
+  8. Delete the post
+  9. Verify post is deleted
+  
+  **Prerequisites:**
+  - Posts API running on the configured port
+  - Valid JWT token from Users API (update the token in protected requests)
+  - Database connection working
+  
+  **Instructions:**
+  1. Replace `your-jwt-token-here` in protected requests with a valid JWT token
+  2. Run requests in sequence
+  3. Update post IDs in subsequent requests based on creation response
+}
+
+tests {
+  test("API should be healthy", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody()).to.have.property('status', 'healthy');
+  });
+}

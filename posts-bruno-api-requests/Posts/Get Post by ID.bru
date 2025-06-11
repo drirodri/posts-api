@@ -1,0 +1,85 @@
+meta {
+  name: Get Post by ID
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/posts/1
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+docs {
+  # Get Post by ID
+  
+  Retrieves a specific post by its ID. This is a public endpoint that doesn't require authentication.
+  
+  **Path Parameters:**
+  - `id`: The ID of the post to retrieve
+  
+  **Expected Response (Success):**
+  ```json
+  {
+    "success": true,
+    "message": "Post retrieved successfully",
+    "data": {
+      "id": 1,
+      "title": "Sample Post",
+      "content": "This is a sample post content",
+      "author_id": 1,
+      "author": {
+        "id": 1,
+        "username": "john_doe",
+        "email": "john@example.com"
+      },
+      "created_at": "2025-06-11T10:00:00Z",
+      "updated_at": "2025-06-11T10:00:00Z"
+    }
+  }
+  ```
+  
+  **Expected Response (Not Found):**
+  ```json
+  {
+    "success": false,
+    "message": "Post not found",
+    "error": {
+      "code": "NOT_FOUND",
+      "message": "Post not found",
+      "details": "The requested Post does not exist"
+    }
+  }
+  ```
+  
+  **Status Codes:** 
+  - 200 OK (success)
+  - 404 Not Found (post doesn't exist)
+  - 400 Bad Request (invalid ID format)
+}
+
+tests {
+  test("should return 200 or 404 status", function() {
+    const status = res.getStatus();
+    expect([200, 404]).to.include(status);
+  });
+  
+  test("should return proper response structure", function() {
+    expect(res.getBody()).to.have.property('success');
+    expect(res.getBody()).to.have.property('message');
+  });
+  
+  test("if successful, should return post data", function() {
+    if (res.getStatus() === 200) {
+      expect(res.getBody()).to.have.property('data');
+      expect(res.getBody().data).to.have.property('id');
+      expect(res.getBody().data).to.have.property('title');
+      expect(res.getBody().data).to.have.property('content');
+      expect(res.getBody().data).to.have.property('author_id');
+    }
+  });
+}

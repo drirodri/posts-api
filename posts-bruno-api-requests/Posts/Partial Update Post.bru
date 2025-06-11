@@ -1,0 +1,46 @@
+meta {
+  name: Partial Update Post
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/api/v1/posts/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: your-jwt-token-here
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Only Title Updated"
+  }
+}
+
+docs {
+  # Partial Update Post
+  
+  Tests partial updates where only some fields are provided.
+  This verifies that the API correctly handles optional fields in update requests.
+  
+  **Test Case:**
+  - Only updating the title field
+  - Content should remain unchanged
+  - Updated timestamp should change
+}
+
+tests {
+  test("should allow partial updates", function() {
+    if (res.getStatus() === 200) {
+      expect(res.getBody().data).to.have.property('title', 'Only Title Updated');
+      expect(res.getBody().data).to.have.property('content');
+    }
+  });
+}

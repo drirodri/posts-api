@@ -1,0 +1,116 @@
+meta {
+  name: Create Post
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/posts
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk2NTA3MzMsImV4cCI6MTc0OTczNzEzM30.IpL8XdBANdxGewYgWww27UFAb2YxAR-xWiayyh4o2mQ
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "My New Post",
+    "content": "This is the content of my new post. It contains detailed information about the topic I want to share with the community."
+  }
+}
+
+docs {
+  # Create Post
+  
+  Creates a new post. This endpoint requires authentication with a valid JWT token.
+  
+  **Authentication:** Bearer Token (JWT from Users API)
+  
+  **Request Body:**
+  ```json
+  {
+    "title": "Post Title",
+    "content": "Post content here..."
+  }
+  ```
+  
+  **Validation Rules:**
+  - `title`: Required, min 1 char, max 255 chars
+  - `content`: Required, min 1 char, max 10000 chars
+  
+  **Expected Response (Success):**
+  ```json
+  {
+    "success": true,
+    "message": "Post created successfully",
+    "data": {
+      "id": 1,
+      "title": "My New Post",
+      "content": "This is the content of my new post...",
+      "author_id": 1,
+      "author": {
+        "id": 1,
+        "username": "john_doe",
+        "email": "john@example.com"
+      },
+      "created_at": "2025-06-11T10:00:00Z",
+      "updated_at": "2025-06-11T10:00:00Z"
+    }
+  }
+  ```
+  
+  **Expected Response (Unauthorized):**
+  ```json
+  {
+    "success": false,
+    "message": "Invalid token",
+    "error": {
+      "code": "INVALID_TOKEN",
+      "message": "Invalid token",
+      "details": "invalid token"
+    }
+  }
+  ```
+  
+  **Status Codes:** 
+  - 201 Created (success)
+  - 400 Bad Request (validation errors)
+  - 401 Unauthorized (invalid/missing token)
+}
+
+tests {
+  test("should return 201 or 401 status", function() {
+    const status = res.getStatus();
+    expect([201, 401]).to.include(status);
+  });
+  
+  test("should return proper response structure", function() {
+    expect(res.getBody()).to.have.property('success');
+    expect(res.getBody()).to.have.property('message');
+  });
+  
+  test("if successful, should return created post", function() {
+    if (res.getStatus() === 201) {
+      expect(res.getBody()).to.have.property('data');
+      expect(res.getBody().data).to.have.property('id');
+      expect(res.getBody().data).to.have.property('title');
+      expect(res.getBody().data).to.have.property('content');
+      expect(res.getBody().data).to.have.property('author_id');
+      expect(res.getBody().data).to.have.property('created_at');
+      expect(res.getBody().data).to.have.property('updated_at');
+    }
+  });
+  
+  test("if unauthorized, should return error", function() {
+    if (res.getStatus() === 401) {
+      expect(res.getBody()).to.have.property('error');
+      expect(res.getBody().error).to.have.property('code');
+    }
+  });
+}

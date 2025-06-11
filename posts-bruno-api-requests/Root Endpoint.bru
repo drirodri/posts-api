@@ -1,0 +1,45 @@
+meta {
+  name: Root Endpoint
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+docs {
+  # Root Endpoint
+  
+  This endpoint returns basic information about the Posts API.
+  
+  **Expected Response:**
+  ```json
+  {
+    "message": "Posts API is running!",
+    "version": "1.0.0"
+  }
+  ```
+  
+  **Status Code:** 200 OK
+}
+
+tests {
+  test("should return 200 status", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("should return running message", function() {
+    expect(res.getBody()).to.have.property('message', 'Posts API is running!');
+  });
+  
+  test("should return version", function() {
+    expect(res.getBody()).to.have.property('version', '1.0.0');
+  });
+}

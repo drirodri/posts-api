@@ -1,0 +1,96 @@
+meta {
+  name: Get Posts by Author
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/posts/author/1?page=1&page_size=10
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  page_size: 10
+}
+
+headers {
+  Content-Type: application/json
+}
+
+docs {
+  # Get Posts by Author
+  
+  Retrieves all posts by a specific author with pagination. This is a public endpoint that doesn't require authentication.
+  
+  **Path Parameters:**
+  - `authorId`: The ID of the author whose posts to retrieve
+  
+  **Query Parameters:**
+  - `page` (optional): Page number (default: 1)
+  - `page_size` (optional): Number of posts per page (default: 10, max: 100)
+  
+  **Expected Response:**
+  ```json
+  {
+    "success": true,
+    "message": "Author posts retrieved successfully",
+    "data": {
+      "posts": [
+        {
+          "id": 1,
+          "title": "Author's Post",
+          "content": "This is a post by the author",
+          "author_id": 1,
+          "author": {
+            "id": 1,
+            "username": "john_doe",
+            "email": "john@example.com"
+          },
+          "created_at": "2025-06-11T10:00:00Z",
+          "updated_at": "2025-06-11T10:00:00Z"
+        }
+      ],
+      "total_count": 1,
+      "page": 1,
+      "page_size": 10,
+      "total_pages": 1
+    }
+  }
+  ```
+  
+  **Status Codes:** 
+  - 200 OK (success)
+  - 400 Bad Request (invalid author ID format)
+  - 500 Internal Server Error (author not found or other errors)
+}
+
+tests {
+  test("should return 200 status", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("should return success response", function() {
+    expect(res.getBody()).to.have.property('success', true);
+  });
+  
+  test("should return posts data with pagination", function() {
+    expect(res.getBody()).to.have.property('data');
+    expect(res.getBody().data).to.have.property('posts');
+    expect(res.getBody().data).to.have.property('total_count');
+    expect(res.getBody().data).to.have.property('page');
+    expect(res.getBody().data).to.have.property('page_size');
+    expect(res.getBody().data).to.have.property('total_pages');
+  });
+  
+  test("all posts should belong to the same author", function() {
+    const posts = res.getBody().data.posts;
+    if (posts.length > 0) {
+      const authorId = 1; // The requested author ID
+      posts.forEach(post => {
+        expect(post.author_id).to.equal(authorId);
+      });
+    }
+  });
+}

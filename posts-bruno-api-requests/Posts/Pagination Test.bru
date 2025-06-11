@@ -1,0 +1,57 @@
+meta {
+  name: Pagination Test
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/posts?page=1&page_size=5
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  page_size: 5
+}
+
+headers {
+  Content-Type: application/json
+}
+
+docs {
+  # Pagination Test
+  
+  Tests the pagination functionality of the get all posts endpoint.
+  
+  **Test Scenarios:**
+  - Test different page sizes
+  - Verify pagination metadata
+  - Test edge cases (page 0, negative numbers)
+  
+  **Modify Query Parameters to Test:**
+  - `page=0` (should default to 1)
+  - `page_size=0` (should default to 10)
+  - `page_size=101` (should limit to 100)
+  - `page=999` (should return empty results if no data)
+}
+
+tests {
+  test("should return valid pagination structure", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().data).to.have.property('posts');
+    expect(res.getBody().data).to.have.property('total_count');
+    expect(res.getBody().data).to.have.property('page');
+    expect(res.getBody().data).to.have.property('page_size');
+    expect(res.getBody().data).to.have.property('total_pages');
+  });
+  
+  test("should respect page size limit", function() {
+    const posts = res.getBody().data.posts;
+    expect(posts.length).to.be.at.most(5);
+  });
+  
+  test("should return correct page number", function() {
+    expect(res.getBody().data.page).to.equal(1);
+  });
+}

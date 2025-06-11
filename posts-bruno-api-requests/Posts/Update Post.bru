@@ -1,0 +1,107 @@
+meta {
+  name: Update Post
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/v1/posts/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: your-jwt-token-here
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Updated Post Title",
+    "content": "This is the updated content of my post. I've made some improvements and added more details about the topic."
+  }
+}
+
+docs {
+  # Update Post
+  
+  Updates an existing post. This endpoint requires authentication and only the post author can update their posts.
+  
+  **Authentication:** Bearer Token (JWT from Users API)
+  
+  **Path Parameters:**
+  - `id`: The ID of the post to update
+  
+  **Request Body (all fields optional):**
+  ```json
+  {
+    "title": "Updated Post Title",
+    "content": "Updated post content..."
+  }
+  ```
+  
+  **Validation Rules:**
+  - `title`: Optional, if provided min 1 char, max 255 chars
+  - `content`: Optional, if provided min 1 char, max 10000 chars
+  - At least one field must be provided
+  
+  **Expected Response (Success):**
+  ```json
+  {
+    "success": true,
+    "message": "Post updated successfully",
+    "data": {
+      "id": 1,
+      "title": "Updated Post Title",
+      "content": "This is the updated content...",
+      "author_id": 1,
+      "author": {
+        "id": 1,
+        "username": "john_doe",
+        "email": "john@example.com"
+      },
+      "created_at": "2025-06-11T10:00:00Z",
+      "updated_at": "2025-06-11T10:30:00Z"
+    }
+  }
+  ```
+  
+  **Status Codes:** 
+  - 200 OK (success)
+  - 400 Bad Request (validation errors, no changes provided)
+  - 401 Unauthorized (invalid/missing token)
+  - 403 Forbidden (not the post author)
+  - 404 Not Found (post doesn't exist)
+}
+
+tests {
+  test("should return appropriate status", function() {
+    const status = res.getStatus();
+    expect([200, 400, 401, 403, 404]).to.include(status);
+  });
+  
+  test("should return proper response structure", function() {
+    expect(res.getBody()).to.have.property('success');
+    expect(res.getBody()).to.have.property('message');
+  });
+  
+  test("if successful, should return updated post", function() {
+    if (res.getStatus() === 200) {
+      expect(res.getBody()).to.have.property('data');
+      expect(res.getBody().data).to.have.property('id');
+      expect(res.getBody().data).to.have.property('title');
+      expect(res.getBody().data).to.have.property('content');
+      expect(res.getBody().data).to.have.property('updated_at');
+    }
+  });
+  
+  test("if forbidden, should indicate access denied", function() {
+    if (res.getStatus() === 403) {
+      expect(res.getBody()).to.have.property('error');
+      expect(res.getBody().error.code).to.equal('FORBIDDEN');
+    }
+  });
+}
