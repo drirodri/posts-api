@@ -1,26 +1,36 @@
-// cors.go - CORS middleware
+// cors.go - CORS middleware using Gorilla Handlers
 package middleware
 
 import (
 	"net/http"
+
+	"github.com/gorilla/handlers"
 )
 
-// CORS middleware handles Cross-Origin Resource Sharing
-func CORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Set CORS headers
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
+// CORSConfig holds CORS configuration
+type CORSConfig struct {
+	AllowedOrigins []string
+	AllowedMethods []string
+	AllowedHeaders []string
+	MaxAge         int
+}
 
-		// Handle preflight requests
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
+// DefaultCORSConfig returns a default CORS configuration for development
+func DefaultCORSConfig() CORSConfig {
+	return CORSConfig{
+		AllowedOrigins: []string{"*"}, // Allow all origins in development
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+		AllowedHeaders: []string{"Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "X-CSRF-Token"},
+		MaxAge:         86400, // 24 hours
+	}
+}
 
-		// Call the next handler
-		next.ServeHTTP(w, r)
-	})
+// NewCORSMiddleware creates a new CORS middleware using Gorilla Handlers
+func NewCORSMiddleware(config CORSConfig) func(http.Handler) http.Handler {
+	return handlers.CORS(
+		handlers.AllowedOrigins(config.AllowedOrigins),
+		handlers.AllowedMethods(config.AllowedMethods),
+		handlers.AllowedHeaders(config.AllowedHeaders),
+		handlers.MaxAge(config.MaxAge),
+	)
 }
