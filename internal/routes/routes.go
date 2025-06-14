@@ -11,11 +11,11 @@ import (
 )
 
 // SetupRoutes configures all HTTP routes for the application
-func SetupRoutes(postHandler *handlers.PostHandler, userService services.UserService) *mux.Router {
+func SetupRoutes(postHandler *handlers.PostHandler, userService services.UserService) http.Handler {
 	router := mux.NewRouter()
 
-	// Apply CORS middleware to all routes
-	router.Use(middleware.CORS)
+	// Remove custom CORS middleware and OPTIONS handler
+	// Will use Gorilla CORS instead
 
 	// Health check endpoint (no auth required)
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -51,9 +51,12 @@ func SetupRoutes(postHandler *handlers.PostHandler, userService services.UserSer
 	
 	// PUT /api/v1/posts/{id} - Update post (auth required, only by author)
 	protected.HandleFunc("/posts/{id:[0-9]+}", postHandler.UpdatePost).Methods("PUT")
-	
 	// DELETE /api/v1/posts/{id} - Delete post (auth required, only by author)
 	protected.HandleFunc("/posts/{id:[0-9]+}", postHandler.DeletePost).Methods("DELETE")
 
-	return router
+	// Apply CORS middleware using our custom middleware
+	corsConfig := middleware.DefaultCORSConfig()
+	corsMiddleware := middleware.NewCORSMiddleware(corsConfig)
+	
+	return corsMiddleware(router)
 }

@@ -47,11 +47,11 @@ func main() {
 	
 	// Create post service
 	postService := services.NewPostService(postRepo, userService)
-	
-	// Create handlers
+		// Create handlers
 	postHandler := handlers.NewPostHandler(postService)
-		// Setup routes
-	router := routes.SetupRoutes(postHandler, userService)
+	
+	// Setup routes with CORS
+	handler := routes.SetupRoutes(postHandler, userService)
 
 	// Configure server
 	port := ":8080"
@@ -71,5 +71,5 @@ func main() {
 	fmt.Println("  PUT    /api/v1/posts/{id} - Update post (auth required)")
 	fmt.Println("  DELETE /api/v1/posts/{id} - Delete post (auth required)")
 
-    log.Fatal(http.ListenAndServe(port, router))
+    log.Fatal(http.ListenAndServe(port, handler))
 }
