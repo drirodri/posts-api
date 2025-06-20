@@ -1,4 +1,5 @@
 package dto
+
 import (
 	"posts-api/internal/models"
 	"time"
