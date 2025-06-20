@@ -1,21 +1,14 @@
-// cors.go - CORS middleware using Gorilla Handlers
 package middleware
-
 import (
 	"net/http"
-
 	"github.com/gorilla/handlers"
 )
-
-// CORSConfig holds CORS configuration
 type CORSConfig struct {
 	AllowedOrigins []string
 	AllowedMethods []string
 	AllowedHeaders []string
 	MaxAge         int
 }
-
-// DefaultCORSConfig returns a default CORS configuration for development
 func DefaultCORSConfig() CORSConfig {
 	return CORSConfig{
 		AllowedOrigins: []string{"*"}, // Allow all origins in development
@@ -24,8 +17,6 @@ func DefaultCORSConfig() CORSConfig {
 		MaxAge:         86400, // 24 hours
 	}
 }
-
-// NewCORSMiddleware creates a new CORS middleware using Gorilla Handlers
 func NewCORSMiddleware(config CORSConfig) func(http.Handler) http.Handler {
 	return handlers.CORS(
 		handlers.AllowedOrigins(config.AllowedOrigins),
