@@ -1,8 +1,5 @@
-// post.go - Post model definition
 package models
-
 import "time"
-
 type Post struct {
 	ID          int64     `json:"id" gorm:"primaryKey;autoIncrement"`
 	Title       string    `json:"title" gorm:"not null"`

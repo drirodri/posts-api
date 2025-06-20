@@ -1,13 +1,10 @@
 package config
-
 import (
 	"fmt"
 	"log"
 	"os"
-
 	"github.com/joho/godotenv"
 )
-
 type DatabaseConfig struct {
 	Host     string
 	Port     string
@@ -16,22 +13,18 @@ type DatabaseConfig struct {
 	DBName   string
 	SSLMode  string
 }
-
 type ServerConfig struct {
 	Port        string
 	UsersAPIURL string
 }
-
 type AppConfig struct {
 	Database DatabaseConfig
 	Server ServerConfig
 }
-
 func LoadConfig() (*AppConfig, error) {
 	if err := godotenv.Load(); err != nil {
 		log.Printf("Error loading .env file: %v", err)
 	}
-
 	cfg := &AppConfig{
 		Database: DatabaseConfig{
 			Host:     os.Getenv("DATABASE_HOST"),
@@ -45,14 +38,12 @@ func LoadConfig() (*AppConfig, error) {
 			UsersAPIURL: os.Getenv("USERS_API_URL"),
 		},
 	}
-
 	if cfg.Database.Host == "" || cfg.Database.Port == "" || cfg.Database.Username == "" ||
 		cfg.Database.Password == "" || cfg.Database.DBName == "" {
 		return nil, fmt.Errorf("missing required database environment variables")
 	}
 	return cfg, nil
 }
-
 func getEnv(key, defaultValue string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value

@@ -1,45 +1,31 @@
-// response.go - Standardized API responses
 package utils
-
 import (
 	"encoding/json"
 	"net/http"
 )
-
-// APIResponse represents a standardized API response
 type APIResponse struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data,omitempty"`
 	Error   *APIError   `json:"error,omitempty"`
 }
-
-// APIError represents error details in API responses
 type APIError struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 	Details string `json:"details,omitempty"`
 }
-
-// ValidationError represents validation error details
 type ValidationError struct {
 	Field   string `json:"field"`
 	Message string `json:"message"`
 }
-
-// ValidationErrors represents multiple validation errors
 type ValidationErrors struct {
 	Errors []ValidationError `json:"validation_errors"`
 }
-
-// WriteJSONResponse writes a JSON response to the HTTP response writer
 func WriteJSONResponse(w http.ResponseWriter, statusCode int, response interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(response)
 }
-
-// WriteSuccessResponse writes a successful API response
 func WriteSuccessResponse(w http.ResponseWriter, statusCode int, message string, data interface{}) {
 	response := APIResponse{
 		Success: true,
@@ -48,8 +34,6 @@ func WriteSuccessResponse(w http.ResponseWriter, statusCode int, message string,
 	}
 	WriteJSONResponse(w, statusCode, response)
 }
-
-// WriteErrorResponse writes an error API response
 func WriteErrorResponse(w http.ResponseWriter, statusCode int, message string, errorCode string, details string) {
 	response := APIResponse{
 		Success: false,
@@ -62,8 +46,6 @@ func WriteErrorResponse(w http.ResponseWriter, statusCode int, message string, e
 	}
 	WriteJSONResponse(w, statusCode, response)
 }
-
-// WriteValidationErrorResponse writes a validation error response
 func WriteValidationErrorResponse(w http.ResponseWriter, validationErrors []ValidationError) {
 	response := APIResponse{
 		Success: false,
@@ -76,16 +58,12 @@ func WriteValidationErrorResponse(w http.ResponseWriter, validationErrors []Vali
 	}
 	WriteJSONResponse(w, http.StatusBadRequest, response)
 }
-
-// WriteNotFoundResponse writes a not found error response
 func WriteNotFoundResponse(w http.ResponseWriter, resource string) {
 	WriteErrorResponse(w, http.StatusNotFound,
 		resource+" not found",
 		"NOT_FOUND",
 		"The requested "+resource+" does not exist")
 }
-
-// WriteInternalErrorResponse writes an internal server error response
 func WriteInternalErrorResponse(w http.ResponseWriter, err error) {
 	WriteErrorResponse(w, http.StatusInternalServerError,
 		"Internal server error",
