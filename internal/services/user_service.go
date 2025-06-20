@@ -21,6 +21,7 @@ type UserDTO struct {
 // UsersAPIResponse represents the direct response from Users API /auth/me endpoint
 type UsersAPIResponse struct {
 	UserID int64  `json:"userId"`
+	Name string `json:"name"`
 	Email  string `json:"email"`
 	Role   string `json:"role"`
 }
@@ -94,7 +95,7 @@ func (s *userService) ValidateToken(token string) (*UserDTO, error) {
 	// Convert UsersAPIResponse to UserDTO
 	userDTO := &UserDTO{
 		ID:    usersAPIResp.UserID,
-		Name:  usersAPIResp.Email, // Use email as name since Users API doesn't provide name
+		Name:  usersAPIResp.Name, // Use email as name since Users API doesn't provide name
 		Email: usersAPIResp.Email,
 		Role:  usersAPIResp.Role,
 	}

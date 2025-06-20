@@ -13,7 +13,7 @@ import (
 
 // PostService defines the business logic interface for posts
 type PostService interface {
-	CreatePost(req *dto.CreatePostRequest, authorID int64) (*dto.PostResponse, error)
+	CreatePost(req *dto.CreatePostRequest, authorID int64, token string) (*dto.PostResponse, error)
 	GetPostByID(id int64) (*dto.PostResponse, error)
 	GetAllPosts(page, pageSize int) (*dto.PostListResponse, error)
 	UpdatePost(id int64, req *dto.UpdatePostRequest, authorID int64) (*dto.PostResponse, error)
@@ -35,12 +35,20 @@ func NewPostService(postRepo repository.PostRepository, userService UserService)
 }
 
 // CreatePost creates a new post after validating the author
-func (s *postService) CreatePost(req *dto.CreatePostRequest, authorID int64) (*dto.PostResponse, error) {
-	// Note: User validation is already done by JWT middleware
-	// The authorID comes from the validated JWT token
+func (s *postService) CreatePost(req *dto.CreatePostRequest, authorID int64, token string) (*dto.PostResponse, error) {
+	// Get user information from token
+	userData, err := s.userService.GetUserFromToken(token)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user information: %w", err)
+	}
 	
-	// Convert DTO to model
-	post := req.ToModel(authorID)
+	// Verify that the token user ID matches the provided authorID
+	if userData.ID != authorID {
+		return nil, errors.New("token user ID does not match provided author ID")
+	}
+	
+	// Convert DTO to model with author information
+	post := req.ToModelWithAuthor(authorID, userData.Name, userData.Email)
 
 	// Save to database
 	if err := s.postRepo.CreatePost(post); err != nil {
@@ -50,9 +58,6 @@ func (s *postService) CreatePost(req *dto.CreatePostRequest, authorID int64) (*d
 	// Create response
 	response := &dto.PostResponse{}
 	response.FromModel(post)
-
-	// Note: Author info should be added by the handler using context data
-	// We don't include author details here to avoid admin-only API calls
 
 	return response, nil
 }

@@ -9,6 +9,7 @@ import (
 	"posts-api/internal/services"
 	"posts-api/pkg/utils"
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -91,8 +92,7 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 			"BUSINESS_VALIDATION_ERROR",
 			err.Error())
 		return
-	}
-	// Extract user ID from JWT token (provided by auth middleware)
+	}	// Extract user ID from JWT token (provided by auth middleware)
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized,
@@ -101,15 +101,23 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 			"User ID not found in request context")
 		return
 	}
+	
+	// Extract token for user API calls
+	token := h.extractTokenFromRequest(r)
+	if token == "" {
+		utils.WriteErrorResponse(w, http.StatusUnauthorized,
+			"Authorization token required",
+			"MISSING_TOKEN",
+			"Bearer token is required")
+		return
+	}
+	
 	// Create post
-	post, err := h.postService.CreatePost(&createReq, userID)
+	post, err := h.postService.CreatePost(&createReq, userID, token)
 	if err != nil {
 		utils.WriteInternalErrorResponse(w, err)
 		return
 	}
-
-	// Add author information since the current user is the author
-	h.addAuthorInfoIfOwner(r, post)
 
 	utils.WriteSuccessResponse(w, http.StatusCreated, "Post created successfully", post)
 }
@@ -408,4 +416,19 @@ func (h *PostHandler) getValidationMessage(e validator.FieldError) string {
 	default:
 		return e.Field() + " is invalid"
 	}
+}
+
+// extractTokenFromRequest extracts the Bearer token from Authorization header
+func (h *PostHandler) extractTokenFromRequest(r *http.Request) string {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return ""
+	}
+	
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		return ""
+	}
+	
+	return parts[1]
 }

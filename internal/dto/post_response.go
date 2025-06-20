@@ -41,6 +41,15 @@ func (pr *PostResponse) FromModel(post *models.Post) {
 	pr.AuthorID = post.AuthorID
 	pr.CreatedAt = post.CreatedAt
 	pr.UpdatedAt = post.UpdatedAt
+	
+	// Include author information if available in the model
+	if post.AuthorName != "" && post.AuthorEmail != "" {
+		pr.Author = &UserData{
+			ID:       post.AuthorID,
+			Username: post.AuthorName,
+			Email:    post.AuthorEmail,
+		}
+	}
 }
 
 // FromModelWithUser converts a Post model to PostResponse and includes user data
